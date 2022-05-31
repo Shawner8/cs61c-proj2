@@ -26,38 +26,85 @@
 matmul:
 
 	# Error checks
-
+    li t0, 1
+    blt a1, t0, exception
+    blt a2, t0, exception
+    blt a4, t0, exception
+    blt a5, t0, exception
+    bne a2, a4, exception
 
 	# Prologue
+    addi sp, sp, -32
+    sw s0, 0(sp)
+    sw s1, 4(sp)
+    sw s2, 8(sp)
+    sw s3, 12(sp)
+    sw s4, 16(sp)
+    sw s5, 20(sp)
+    sw s6, 24(sp)
+    sw ra, 28(sp)
 
-
+    mv s0, a0
+    mv s1, a1
+    mv s2, a2
+    mv s3, a3
+    mv s4, a4
+    mv s5, a5
+    mv s6, a6
+    li t0, 0     # set t0 as row index
+    li t1, 0     # set t1 as column index
+    
 outer_loop_start:
-
-
-
+    li t1, 0
 
 inner_loop_start:
-
-
-
-
-
-
-
-
-
-
-
+    mul t2, t0, s2    # set t2 as the start index of t0 th row in m0
+    slli t2, t2, 2
+    add a0, t2, s0
+    slli t3, t1, 2
+    add a1, t3, s3
+    mv a2, s2
+    li a3, 1
+    mv a4, s5
+    
+    addi sp, sp, -8
+    sw t0, 0(sp)
+    sw t1, 4(sp)
+    
+    jal dot
+    
+    lw t0, 0(sp)
+    lw t1, 4(sp)
+    addi sp, sp, 8
+    
+    mul t2, t0, s5
+    add t2, t2, t1
+    slli t2, t2, 2
+    add t2, t2, s6
+    sw a0, 0(t2)
+    
+    addi t1, t1, 1
+    bne t1, s5, inner_loop_start
 
 inner_loop_end:
-
-
-
+    addi t0, t0, 1
+    bne t0, s1, outer_loop_start
 
 outer_loop_end:
 
-
 	# Epilogue
-
+    lw s0, 0(sp)
+    lw s1, 4(sp)
+    lw s2, 8(sp)
+    lw s3, 12(sp)
+    lw s4, 16(sp)
+    lw s5, 20(sp)
+    lw s6, 24(sp)
+    lw ra, 28(sp)
+    addi sp, sp, 32
 
 	ret
+
+exception:
+    li a0, 38
+    j exit
